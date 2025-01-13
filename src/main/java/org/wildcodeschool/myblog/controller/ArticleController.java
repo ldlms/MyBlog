@@ -101,7 +101,7 @@ public class ArticleController {
 	
 	@GetMapping("/search-content")
 	public ResponseEntity<List<Article>> getArticlesByContent(@RequestParam String search){
-		List<Article> articles = articleRepository.findByArticleContaining(search);
+		List<Article> articles = articleRepository.findBycontentContaining(search);
 		if(articles.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
