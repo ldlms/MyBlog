@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.wildcodeschool.myblog.model.Article;
 import org.wildcodeschool.myblog.repository.ArticleRepository;
@@ -76,16 +77,17 @@ public class ArticleController {
 		return ResponseEntity.noContent().build();
 	}
 	
-	
-	public ResponseEntity<List<Article>> getArticlesByContent(String characters){
-		List<Article> articles = articleRepository.findByArticleContaining(characters);
+	@GetMapping("/search-content")
+	public ResponseEntity<List<Article>> getArticlesByContent(@RequestParam String search){
+		List<Article> articles = articleRepository.findByArticleContaining(search);
 		if(articles.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
 		return ResponseEntity.ok(articles);
 	}
 	
-	public ResponseEntity<List<Article>> getArticlesCreateAfter(Date creationDate){
+	@GetMapping("/articleByDate")
+	public ResponseEntity<List<Article>> getArticlesCreateAfter(@RequestParam Date creationDate){
 		List<Article> articles = articleRepository.findByCreatedAtAfter(creationDate);
 		if(articles.isEmpty()) {
 			return ResponseEntity.noContent().build();
@@ -93,6 +95,7 @@ public class ArticleController {
 		return ResponseEntity.ok(articles);
 		}
 	
+	@GetMapping("/lastFive")
 	public ResponseEntity<List<Article>> getFiveLastArticles(){
 		List<Article> articles = articleRepository.findTop5ByOrderByCreatedAtDesc();
 		if(articles.isEmpty()) {
