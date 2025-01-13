@@ -1,4 +1,4 @@
-package org.wilcodeschool.model;
+package org.wildcodeschool.myblog.model;
 
 import java.time.LocalDateTime;
 
