@@ -9,7 +9,7 @@ import org.wildcodeschool.myblog.model.Article;
 
 public interface ArticleRepository extends JpaRepository<Article,Long> {
 
-	List<Article> findByArticleContaining(String search);
+	List<Article> findBycontentContaining(String search);
 	
 	List<Article> findByCreatedAtAfter(LocalDateTime creationDate);
 	
