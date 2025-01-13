@@ -17,17 +17,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.wildcodeschool.myblog.model.Article;
 import org.wildcodeschool.myblog.repository.ArticleRepository;
+import org.wildcodeschool.myblog.repository.CategoryRepository;
 
 @RestController
 @RequestMapping("/articles")
 public class ArticleController {
 
 	private final ArticleRepository articleRepository;
+	private final CategoryRepository categoryRepository;
 	
-	public ArticleController(ArticleRepository articleRepository) {
+	public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository) {
         this.articleRepository = articleRepository;
+        this.categoryRepository = categoryRepository;
     }
 	
+	@GetMapping
 	public ResponseEntity<List<Article>> getAllArticle(){
 		List<Article> articles = articleRepository.findAll();
 		if(articles.isEmpty()) {
