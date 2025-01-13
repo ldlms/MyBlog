@@ -1,6 +1,7 @@
 package org.wildcodeschool.myblog.controller;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -73,5 +74,30 @@ public class ArticleController {
 		} 
 		articleRepository.delete(article);
 		return ResponseEntity.noContent().build();
+	}
+	
+	
+	public ResponseEntity<List<Article>> getArticlesByContent(String characters){
+		List<Article> articles = articleRepository.findByArticleContaining(characters);
+		if(articles.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(articles);
+	}
+	
+	public ResponseEntity<List<Article>> getArticlesCreateAfter(Date creationDate){
+		List<Article> articles = articleRepository.findByCreatedAtAfter(creationDate);
+		if(articles.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(articles);
+		}
+	
+	public ResponseEntity<List<Article>> getFiveLastArticles(){
+		List<Article> articles = articleRepository.findTop5ByOrderByCreatedAtDesc();
+		if(articles.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(articles);
 	}
 }
