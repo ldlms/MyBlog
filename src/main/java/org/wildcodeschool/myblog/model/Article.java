@@ -27,8 +27,6 @@ public class Article {
 	@Column(nullable = false)
 	private LocalDateTime updatedAt;
 
-	// Getters et setters
-
 	public Long getId() {
 		return id;
 	}
