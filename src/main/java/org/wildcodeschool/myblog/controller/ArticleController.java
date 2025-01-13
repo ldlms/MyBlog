@@ -87,7 +87,7 @@ public class ArticleController {
 	}
 	
 	@GetMapping("/articleByDate")
-	public ResponseEntity<List<Article>> getArticlesCreateAfter(@RequestParam Date creationDate){
+	public ResponseEntity<List<Article>> getArticlesCreateAfter(@RequestParam LocalDateTime creationDate){
 		List<Article> articles = articleRepository.findByCreatedAtAfter(creationDate);
 		if(articles.isEmpty()) {
 			return ResponseEntity.noContent().build();

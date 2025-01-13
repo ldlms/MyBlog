@@ -1,5 +1,6 @@
 package org.wildcodeschool.myblog.repository;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -10,7 +11,7 @@ public interface ArticleRepository extends JpaRepository<Article,Long> {
 
 	List<Article> findByArticleContaining(String search);
 	
-	List<Article> findByCreatedAtAfter(Date creationDate);
+	List<Article> findByCreatedAtAfter(LocalDateTime creationDate);
 	
 	List<Article> findTop5ByOrderByCreatedAtDesc();
 }
