@@ -2,8 +2,10 @@ package org.wildcodeschool.myblog.controller;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.wildcodeschool.myblog.dto.ArticleDto;
 import org.wildcodeschool.myblog.model.Article;
 import org.wildcodeschool.myblog.model.Category;
 import org.wildcodeschool.myblog.repository.ArticleRepository;
@@ -35,25 +38,31 @@ public class ArticleController {
     }
 	
 	@GetMapping
-	public ResponseEntity<List<Article>> getAllArticle(){
-		List<Article> articles = articleRepository.findAll();
-		if(articles.isEmpty()) {
-			return ResponseEntity.noContent().build();
-		}
-		return ResponseEntity.ok(articles);
+	public ResponseEntity<List<ArticleDto>> getAllArticle(){
+		
+	    List<ArticleDto> articlesDto = articleRepository.findAll()
+	        .stream()
+	        .map(this::convertToDTO)  
+	        .collect(Collectors.toList());
+	    
+	    if(articlesDto.isEmpty()) {  
+	        return ResponseEntity.noContent().build();
+	    }
+	        
+	    return ResponseEntity.ok(articlesDto);
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<Article> getArticleById(@PathVariable Long id){
+	public ResponseEntity<ArticleDto> getArticleById(@PathVariable Long id){
 		Article article = articleRepository.findById(id).orElse(null);
 		if(article == null) {
 			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok(article);
+		return ResponseEntity.ok(convertToDTO(article));
 	}
 	
 	@PostMapping
-	public ResponseEntity<Article> createArticle(@RequestBody Article article){
+	public ResponseEntity<ArticleDto> createArticle(@RequestBody Article article){
 		article.setCreatedAt(LocalDateTime.now());
 		article.setUpdatedAt(LocalDateTime.now());
 		
@@ -66,11 +75,11 @@ public class ArticleController {
 		}
 		
 		Article savedArticle = articleRepository.save(article);
-		return ResponseEntity.status(HttpStatus.CREATED).body(savedArticle);
+		return ResponseEntity.status(HttpStatus.CREATED).body(convertToDTO(savedArticle));
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<Article> updateArticle(@PathVariable Long id,@RequestBody Article articleDetails){
+	public ResponseEntity<ArticleDto> updateArticle(@PathVariable Long id,@RequestBody Article articleDetails){
 		Article article = articleRepository.findById(id).orElse(null);
 		if(article == null) {
 			return ResponseEntity.notFound().build();
@@ -88,7 +97,7 @@ public class ArticleController {
 		}
 		
 		Article updatedArticle = articleRepository.save(article);
-		return ResponseEntity.ok(updatedArticle);
+		return ResponseEntity.ok(convertToDTO(updatedArticle));
 	}
 	
 	@DeleteMapping("/{id}")
@@ -102,8 +111,11 @@ public class ArticleController {
 	}
 	
 	@GetMapping("/search-content")
-	public ResponseEntity<List<Article>> getArticlesByContent(@RequestParam String search){
-		List<Article> articles = articleRepository.findBycontentContaining(search);
+	public ResponseEntity<List<ArticleDto>> getArticlesByContent(@RequestParam String search){
+		List<ArticleDto> articles = articleRepository.findBycontentContaining(search)
+				.stream()
+				.map(this::convertToDTO)
+				.collect(Collectors.toList());
 		if(articles.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
@@ -111,9 +123,12 @@ public class ArticleController {
 	}
 	
 	@GetMapping("/articleByDate")
-	public ResponseEntity<List<Article>> getArticlesCreateAfter(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime creationDate){
+	public ResponseEntity<List<ArticleDto>> getArticlesCreateAfter(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime creationDate){
 	    
-		List<Article> articles = articleRepository.findByCreatedAtAfter(creationDate);
+		List<ArticleDto> articles = articleRepository.findByCreatedAtAfter(creationDate)
+													.stream()
+													.map(this::convertToDTO)
+													.collect(Collectors.toList());
 		if(articles.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
@@ -121,11 +136,26 @@ public class ArticleController {
 		}
 	
 	@GetMapping("/lastFive")
-	public ResponseEntity<List<Article>> getFiveLastArticles(){
-		List<Article> articles = articleRepository.findTop5ByOrderByCreatedAtDesc();
+	public ResponseEntity<List<ArticleDto>> getFiveLastArticles(){
+		List<ArticleDto> articles = articleRepository.findTop5ByOrderByCreatedAtDesc()
+													.stream()
+													.map(this::convertToDTO)
+													.collect(Collectors.toList());
 		if(articles.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
 		return ResponseEntity.ok(articles);
+	}
+	
+	private ArticleDto convertToDTO(Article article) {
+	    ArticleDto articleDTO = new ArticleDto();
+	    articleDTO.setId(article.getId());
+	    articleDTO.setTitle(article.getTitle());
+	    articleDTO.setContent(article.getContent());
+	    articleDTO.setUpdatedAt(article.getUpdatedAt());
+	    if (article.getCategory() != null) {
+	        articleDTO.setCategoryName(article.getCategory().getName());
+	    }
+	    return articleDTO;
 	}
 }
