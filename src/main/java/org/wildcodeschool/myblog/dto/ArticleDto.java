@@ -9,7 +9,7 @@ public class ArticleDto {
     private String content;
     private LocalDateTime updatedAt;
     private String categoryName;
-    private List<Long> imagesId; 
+    private List<String> imagesUrl; 
 
     public Long getId() {
         return id;
@@ -52,13 +52,14 @@ public class ArticleDto {
         this.categoryName = categoryName;
     }
 
-	public List<Long> getImagesId() {
-		return imagesId;
+	public List<String> getImagesUrl() {
+		return imagesUrl;
 	}
 
-	public void setImagesId(List<Long> imagesId) {
-		this.imagesId = imagesId;
+	public void setImagesUrl(List<String> imagesUrl) {
+		this.imagesUrl = imagesUrl;
 	}
+
     
     
 }
