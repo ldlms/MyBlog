@@ -3,63 +3,27 @@ package org.wildcodeschool.myblog.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ArticleDto {
-    private Long id;
-    private String title;
-    private String content;
-    private LocalDateTime updatedAt;
-    private String categoryName;
-    private List<String> imagesUrl; 
+import org.wildcodeschool.myblog.model.Article;
+import org.wildcodeschool.myblog.model.ArticleAuthor;
+import org.wildcodeschool.myblog.model.Author;
+import org.wildcodeschool.myblog.model.Image;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
-    }
-
-	public List<String> getImagesUrl() {
-		return imagesUrl;
-	}
-
-	public void setImagesUrl(List<String> imagesUrl) {
-		this.imagesUrl = imagesUrl;
-	}
-
-    
-    
+public record ArticleDto(Long id, 
+		String title, 
+		String content, 
+		String categoryName, 
+		List<String> imagesUrl,
+		List<String> authorLastname) 
+{
+	public static ArticleDto convertToDTO(Article article) {
+		return new ArticleDto(
+				article.getId(), 
+				article.getTitle(), 
+				article.getContent(),
+				article.getCategory() != null ? article.getCategory().getName() : null,
+				article.getImages() != null ? article.getImages().stream().map(Image::getUrl).toList() : null,
+				article.getArticleAuthors() != null
+						? article.getArticleAuthors().stream().map(author -> author.getAuthor().getLastname()).toList()
+						: null);
+	};
 }

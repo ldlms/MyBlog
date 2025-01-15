@@ -22,9 +22,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.wildcodeschool.myblog.dto.ArticleDto;
 import org.wildcodeschool.myblog.model.Article;
+import org.wildcodeschool.myblog.model.ArticleAuthor;
+import org.wildcodeschool.myblog.model.Author;
 import org.wildcodeschool.myblog.model.Category;
 import org.wildcodeschool.myblog.model.Image;
+import org.wildcodeschool.myblog.repository.ArticleAuthorRepository;
 import org.wildcodeschool.myblog.repository.ArticleRepository;
+import org.wildcodeschool.myblog.repository.AuthorRepository;
 import org.wildcodeschool.myblog.repository.CategoryRepository;
 import org.wildcodeschool.myblog.repository.ImageRepository;
 
@@ -35,18 +39,22 @@ public class ArticleController {
 	private final ArticleRepository articleRepository;
 	private final CategoryRepository categoryRepository;
 	private final ImageRepository imageRepository;
+	private final ArticleAuthorRepository articleAuthorRepository;
+	private final AuthorRepository authorRepository;
 
 	public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository,
-			ImageRepository imageRepository) {
+			ImageRepository imageRepository, ArticleAuthorRepository articleAuthorRepository, AuthorRepository authorRepository) {
 		this.articleRepository = articleRepository;
 		this.categoryRepository = categoryRepository;
 		this.imageRepository = imageRepository;
+		this.articleAuthorRepository = articleAuthorRepository;
+		this.authorRepository = authorRepository;
 	}
 
 	@GetMapping
 	public ResponseEntity<List<ArticleDto>> getAllArticle() {
 
-		List<ArticleDto> articlesDto = articleRepository.findAll().stream().map(this::convertToDTO)
+		List<ArticleDto> articlesDto = articleRepository.findAll().stream().map(article -> ArticleDto.convertToDTO(article))
 				.collect(Collectors.toList());
 
 		if (articlesDto.isEmpty()) {
@@ -62,7 +70,7 @@ public class ArticleController {
 		if (article == null) {
 			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok(convertToDTO(article));
+		return ResponseEntity.ok(ArticleDto.convertToDTO(article));
 	}
 
 	@PostMapping
@@ -99,7 +107,17 @@ public class ArticleController {
 		}
 
 		Article savedArticle = articleRepository.save(article);
-		return ResponseEntity.status(HttpStatus.CREATED).body(convertToDTO(savedArticle));
+		
+		if(article.getArticleAuthors() != null) {
+			for(ArticleAuthor articleAuth : article.getArticleAuthors()) {
+				Author author = articleAuth.getAuthor();
+				if(authorRepository.findByLastname(author.getLastname()) == null) {
+					return ResponseEntity.badRequest().body(null);
+				}
+				
+			}
+		}
+		return ResponseEntity.status(HttpStatus.CREATED).body(ArticleDto.convertToDTO(savedArticle));
 	}
 
 	@PutMapping("/{id}")
@@ -138,7 +156,7 @@ public class ArticleController {
 			article.setImages(imagesToUpdate);
 	}
 
-	Article updatedArticle = articleRepository.save(article);return ResponseEntity.ok(convertToDTO(updatedArticle));
+	Article updatedArticle = articleRepository.save(article);return ResponseEntity.ok(ArticleDto.convertToDTO(updatedArticle));
 	}
 
 	@DeleteMapping("/{id}")
@@ -147,13 +165,18 @@ public class ArticleController {
 		if(article == null) {
 			return ResponseEntity.notFound().build();
 		} 
+		if(article.getArticleAuthors() != null) {
+			for(ArticleAuthor artAt : article.getArticleAuthors()) {
+				articleAuthorRepository.delete(artAt);
+			}	
+		}
 		articleRepository.delete(article);
 		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping("/search-content")
 	public ResponseEntity<List<ArticleDto>> getArticlesByContent(@RequestParam String search) {
-		List<ArticleDto> articles = articleRepository.findBycontentContaining(search).stream().map(this::convertToDTO)
+		List<ArticleDto> articles = articleRepository.findBycontentContaining(search).stream().map(article -> ArticleDto.convertToDTO(article))
 				.collect(Collectors.toList());
 		if (articles.isEmpty()) {
 			return ResponseEntity.noContent().build();
@@ -166,7 +189,7 @@ public class ArticleController {
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime creationDate) {
 
 		List<ArticleDto> articles = articleRepository.findByCreatedAtAfter(creationDate).stream()
-				.map(this::convertToDTO).collect(Collectors.toList());
+				.map(article -> ArticleDto.convertToDTO(article)).collect(Collectors.toList());
 		if (articles.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
@@ -175,7 +198,7 @@ public class ArticleController {
 
 	@GetMapping("/lastFive")
 	public ResponseEntity<List<ArticleDto>> getFiveLastArticles() {
-		List<ArticleDto> articles = articleRepository.findTop5ByOrderByCreatedAtDesc().stream().map(this::convertToDTO)
+		List<ArticleDto> articles = articleRepository.findTop5ByOrderByCreatedAtDesc().stream().map(article -> ArticleDto.convertToDTO(article))
 				.collect(Collectors.toList());
 		if (articles.isEmpty()) {
 			return ResponseEntity.noContent().build();
@@ -183,18 +206,4 @@ public class ArticleController {
 		return ResponseEntity.ok(articles);
 	}
 
-	private ArticleDto convertToDTO(Article article) {
-		ArticleDto articleDTO = new ArticleDto();
-		articleDTO.setId(article.getId());
-		articleDTO.setTitle(article.getTitle());
-		articleDTO.setContent(article.getContent());
-		articleDTO.setUpdatedAt(article.getUpdatedAt());
-		if (article.getCategory() != null) {
-			articleDTO.setCategoryName(article.getCategory().getName());
-		}
-		if(article.getImages() != null) {
-			articleDTO.setImagesUrl(article.getImages().stream().map(Image::getUrl).toList());
-		}
-		return articleDTO;
-	}
 }

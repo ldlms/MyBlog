@@ -93,15 +93,7 @@ public class CategoryController {
 		categoryDto.setName(category.getName());
 		
 		if(category.getArticles() != null) {
-			categoryDto.setArticles(category.getArticles().stream().map(article -> {
-                ArticleDto articleDto = new ArticleDto();
-                articleDto.setId(article.getId());
-                articleDto.setTitle(article.getTitle());
-                articleDto.setContent(article.getContent());
-                articleDto.setUpdatedAt(article.getUpdatedAt());
-                articleDto.setCategoryName(article.getCategory().getName());
-                return articleDto;
-            }).collect(Collectors.toList()));
+			categoryDto.setArticles(category.getArticles().stream().map(article -> ArticleDto.convertToDTO(article)).collect(Collectors.toList()));
 		}
 		
 		return categoryDto;
