@@ -89,7 +89,6 @@ public class ArticleController {
 		if (article.getImages() != null && !article.getImages().isEmpty()) {
 			List<Image> validImages = new ArrayList<Image>();
 			for (Image image : article.getImages()) {
-				if (image.getUrl() != null) {
 					Image existingImage = imageRepository.findByUrl(image.getUrl()).orElse(null);
 					if (existingImage != null) {
 						validImages.add(existingImage);
@@ -99,24 +98,27 @@ public class ArticleController {
 						Image newImage = imageRepository.save(image);
 						validImages.add(newImage);
 					}
-				} else {
-					return ResponseEntity.badRequest().body(null);
-				}
 			}
 			article.setImages(validImages);
 		}
 
 		Article savedArticle = articleRepository.save(article);
 		
-		if(article.getArticleAuthors() != null) {
-			for(ArticleAuthor articleAuth : article.getArticleAuthors()) {
-				Author author = articleAuth.getAuthor();
-				if(authorRepository.findByLastname(author.getLastname()) == null) {
-					return ResponseEntity.badRequest().body(null);
-				}
-				
-			}
-		}
+		if (article.getArticleAuthors() != null) {
+            for (ArticleAuthor articleAuthor : article.getArticleAuthors()) {
+                Author author = articleAuthor.getAuthor();
+                author = authorRepository.findFirstByLastname(author.getLastname()).orElse(null);
+                if (author == null) {
+                    return ResponseEntity.badRequest().body(null);
+                }
+                
+                articleAuthor.setAuthor(author);
+                articleAuthor.setArticle(savedArticle);
+                articleAuthor.setContribution(articleAuthor.getContribution());
+
+                articleAuthorRepository.save(articleAuthor);
+            }
+        }
 		return ResponseEntity.status(HttpStatus.CREATED).body(ArticleDto.convertToDTO(savedArticle));
 	}
 
@@ -155,8 +157,37 @@ public class ArticleController {
 		}
 			article.setImages(imagesToUpdate);
 	}
+		if(articleDetails.getArticleAuthors() != null) {
+			
+			for (ArticleAuthor oldArticleAuthor : article.getArticleAuthors()) {
+                articleAuthorRepository.delete(oldArticleAuthor);
+            }
 
-	Article updatedArticle = articleRepository.save(article);return ResponseEntity.ok(ArticleDto.convertToDTO(updatedArticle));
+            List<ArticleAuthor> updatedArticleAuthors = new ArrayList<>();
+            
+			for(ArticleAuthor articleAuthor : articleDetails.getArticleAuthors()) {
+				Author author = articleAuthor.getAuthor();
+				author = authorRepository.findFirstByLastname(author.getLastname()).orElse(null);
+				if(author == null) {
+					return ResponseEntity.badRequest().body(null);
+				}
+				
+				ArticleAuthor newArticleAuth = new ArticleAuthor();
+				newArticleAuth.setArticle(article);
+				newArticleAuth.setAuthor(author);
+				newArticleAuth.setContribution(articleAuthor.getContribution());
+				
+				updatedArticleAuthors.add(newArticleAuth);
+			}
+			
+			for(ArticleAuthor articleAuthor : updatedArticleAuthors) {
+				articleAuthorRepository.save(articleAuthor);
+			}
+			article.setArticleAuthors(updatedArticleAuthors);
+		}
+
+	Article updatedArticle = articleRepository.save(article);
+	return ResponseEntity.ok(ArticleDto.convertToDTO(updatedArticle));
 	}
 
 	@DeleteMapping("/{id}")
