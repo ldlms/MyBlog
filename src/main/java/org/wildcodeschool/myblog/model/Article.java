@@ -91,4 +91,14 @@ public class Article {
 	public void setCategory(Category category) {
 		this.category = category;
 	}
+
+	public List<Image> getImages() {
+		return images;
+	}
+
+	public void setImages(List<Image> images) {
+		this.images = images;
+	}
+	
+	
 }

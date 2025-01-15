@@ -22,8 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.wildcodeschool.myblog.dto.ArticleDto;
 import org.wildcodeschool.myblog.model.Article;
 import org.wildcodeschool.myblog.model.Category;
+import org.wildcodeschool.myblog.model.Image;
 import org.wildcodeschool.myblog.repository.ArticleRepository;
 import org.wildcodeschool.myblog.repository.CategoryRepository;
+import org.wildcodeschool.myblog.repository.ImageRepository;
 
 @RestController
 @RequestMapping("/articles")
@@ -31,10 +33,12 @@ public class ArticleController {
 
 	private final ArticleRepository articleRepository;
 	private final CategoryRepository categoryRepository;
+	private final ImageRepository imageRepository;
 	
-	public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository) {
+	public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository, ImageRepository imageRepository) {
         this.articleRepository = articleRepository;
         this.categoryRepository = categoryRepository;
+        this.imageRepository = imageRepository;
     }
 	
 	@GetMapping
@@ -74,6 +78,24 @@ public class ArticleController {
 			article.setCategory(category);
 		}
 		
+		if(article.getImages() != null && !article.getImages().isEmpty()) {
+			List<Image> validImages = new ArrayList<Image>();
+			for(Image image : article.getImages()) {
+				if(image.getUrl() != null) {
+					Image existingImage = imageRepository.findByUrl(image.getUrl());
+					if(existingImage != null) {
+					validImages.add(existingImage);
+					}else {
+						return ResponseEntity.badRequest().body(null);
+					}
+				}else {
+					Image newImage = imageRepository.save(image);
+					validImages.add(newImage);
+				}
+			}
+			article.setImages(validImages);
+		}
+		
 		Article savedArticle = articleRepository.save(article);
 		return ResponseEntity.status(HttpStatus.CREATED).body(convertToDTO(savedArticle));
 	}
@@ -96,12 +118,19 @@ public class ArticleController {
 			article.setCategory(category);
 		}
 		
+		if(articleDetails.getImages() != null && !articleDetails.getImages().isEmpty()) {
+			List<Image> imagesToUpdate = new ArrayList<Image>();
+			for(Image image : articleDetails.getImages()) {
+				
+			}
+		}
+		
 		Article updatedArticle = articleRepository.save(article);
 		return ResponseEntity.ok(convertToDTO(updatedArticle));
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Article> deleteArticle(@PathVariable Long id){
+	public ResponseEntity<Void> deleteArticle(@PathVariable Long id){
 		Article article = articleRepository.findById(id).orElse(null);
 		if(article == null) {
 			return ResponseEntity.notFound().build();
