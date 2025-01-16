@@ -133,7 +133,7 @@ public class ArticleController {
 		article.setUpdatedAt(LocalDateTime.now());
 
 		if (articleDetails.getCategory() != null) {
-			Category category = categoryRepository.findById(articleDetails.getCategory().getId()).orElse(null);
+			Category category = categoryRepository.findByName(articleDetails.getCategory().getName()).orElse(null);
 			if (category == null) {
 				return ResponseEntity.badRequest().body(null);
 			}
@@ -146,11 +146,15 @@ public class ArticleController {
 				if (image.getId() != null) {
 				Image imageToCheck = imageRepository.findByUrl(image.getUrl()).orElse(null);
 				if (imageToCheck != null) {
+					imageToCheck.setUpdatedAt(LocalDateTime.now());
 					imagesToUpdate.add(imageToCheck);
 				} else {
 					return ResponseEntity.badRequest().body(null);
+					//on ne fournit pas un Id pour l'image lors de l'update, sinon erreur 400, a changer ?
 				}
 				}else {
+					image.setUpdatedAt(LocalDateTime.now());
+					image.setCreatedAt(LocalDateTime.now());
 					Image imageToSave = imageRepository.save(image);
 					imagesToUpdate.add(imageToSave);
 			}
