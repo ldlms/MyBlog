@@ -2,29 +2,18 @@ package org.wildcodeschool.myblog.dto;
 
 import java.util.List;
 
-public class ImageDto {
-    private Long id;
-    private String url;
-    private List<Long> articleIds;
+import org.wildcodeschool.myblog.model.Image;
+
+public record ImageDto(Long id, String url, List<Long> articleIds) {
+   public static ImageDto convertToDto(Image image) {
+	   return new ImageDto(
+			   image.getId(),
+			   image.getUrl(),
+			   image.getArticles() != null ? image.getArticles().stream().map(article -> article.getId()).toList():null
+			   );
+   };
     
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public String getUrl() {
-		return url;
-	}
-	public void setUrl(String url) {
-		this.url = url;
-	}
-	public List<Long> getArticleIds() {
-		return articleIds;
-	}
-	public void setArticleIds(List<Long> articleIds) {
-		this.articleIds = articleIds;
-	}
+	
 
     
 }

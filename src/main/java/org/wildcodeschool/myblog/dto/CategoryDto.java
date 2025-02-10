@@ -2,33 +2,16 @@ package org.wildcodeschool.myblog.dto;
 
 import java.util.List;
 
-public class CategoryDto {
-    private Long id;
-    private String name;
-    private List<ArticleDto> articles;
+import org.wildcodeschool.myblog.model.Article;
+import org.wildcodeschool.myblog.model.Category;
 
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<ArticleDto> getArticles() {
-        return articles;
-    }
-
-    public void setArticles(List<ArticleDto> articles) {
-        this.articles = articles;
-    }
+public record CategoryDto(Long id,String name,List<String> articles) {
+	
+	public static CategoryDto convertToDto(Category category) {
+		return new CategoryDto(
+				category.getId(),
+				category.getName(),
+				category.getArticles() != null ? category.getArticles().stream().map(Article::getTitle).toList() : null
+				);
+	}
 }

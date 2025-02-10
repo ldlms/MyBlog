@@ -19,80 +19,47 @@ import org.wildcodeschool.myblog.model.Article;
 import org.wildcodeschool.myblog.model.Image;
 import org.wildcodeschool.myblog.repository.ArticleRepository;
 import org.wildcodeschool.myblog.repository.ImageRepository;
+import org.wildcodeschool.myblog.service.ImageService;
 
 @RestController
 @RequestMapping("/images")
 public class ImageController {
 
-	private ImageRepository imageRepository;
-	private ArticleRepository articleRepository;
+	private ImageService imageService;
+
 	
-	public ImageController(ImageRepository imageRepository, ArticleRepository articleRepository ) {
-		this.imageRepository = imageRepository;
-		this.articleRepository = articleRepository;
+	public ImageController(ImageService imageService) {
+		this.imageService = imageService;
 	}
 	
 	@GetMapping
 	public ResponseEntity<List<ImageDto>> getAllImages(){
-		List<ImageDto> imageDto	= imageRepository.findAll()
-								.stream()
-								.map(this::convertToDTO)
-								.toList();
+		List<ImageDto> images = imageService.getAllImages();
 		
-		return imageDto.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(imageDto);
+		return images.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(images);
 	}
 	
 	@GetMapping("/{id}")
 	public ResponseEntity<ImageDto> getImageById(@PathVariable Long id){
-		Image image = imageRepository.findById(id).orElse(null);
+		ImageDto image = imageService.getImageById(id);
 		
-		return image == null? ResponseEntity.notFound().build():ResponseEntity.ok(convertToDTO(image));
+		return image == null? ResponseEntity.notFound().build():ResponseEntity.ok(image);
 	}
 	
 	@PostMapping
 	public ResponseEntity<ImageDto> createImage(@RequestBody Image image){
-		image.setCreatedAt(LocalDateTime.now());
-		image.setUpdatedAt(LocalDateTime.now());
-		
-		Image imageToSave = imageRepository.save(image);
-		return ResponseEntity.status(201).body(convertToDTO(imageToSave));
+		return ResponseEntity.ok(imageService.createImage(image));
 	}
 	
 	@PutMapping("/{id}")
 	public ResponseEntity<ImageDto> updateImage(@RequestBody Image imageDetails, @PathVariable Long id){
-		Image image = imageRepository.findById(id).orElse(null);
-		if(image == null) {
-			return ResponseEntity.notFound().build();
-		}
-		image.setUpdatedAt(LocalDateTime.now());
-		image.setUrl(imageDetails.getUrl());
-		image.setArticles(imageDetails.getArticles());
-		
-		imageRepository.save(image);
-		return ResponseEntity.ok(convertToDTO(image));
+		return ResponseEntity.ok(imageService.updateImage(id, imageDetails));
 	}
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteImage(@PathVariable Long id){
-		Image image = imageRepository.findById(id).orElse(null);
-		if(image == null) {
-			return ResponseEntity.notFound().build();
-		}
-		
-		imageRepository.delete(image);
+		imageService.deleteImage(id);
 		return ResponseEntity.noContent().build();
-	}
-	
-	private ImageDto convertToDTO(Image image) {
-		ImageDto imageDto = new ImageDto();
-		
-		imageDto.setId(image.getId());
-		imageDto.setUrl(image.getUrl());
-		if(image.getArticles() != null) {
-			imageDto.setArticleIds(image.getArticles().stream().map(articles -> articles.getId()).collect(Collectors.toList()));
-		}
-		
-		return imageDto;
 	}
 	
 }

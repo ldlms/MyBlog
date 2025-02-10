@@ -31,182 +31,56 @@ import org.wildcodeschool.myblog.repository.ArticleRepository;
 import org.wildcodeschool.myblog.repository.AuthorRepository;
 import org.wildcodeschool.myblog.repository.CategoryRepository;
 import org.wildcodeschool.myblog.repository.ImageRepository;
+import org.wildcodeschool.myblog.service.ArticleService;
 
 @RestController
 @RequestMapping("/articles")
 public class ArticleController {
 
 	private final ArticleRepository articleRepository;
-	private final CategoryRepository categoryRepository;
-	private final ImageRepository imageRepository;
-	private final ArticleAuthorRepository articleAuthorRepository;
-	private final AuthorRepository authorRepository;
+	private final ArticleService articleService;
 
 	public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository,
-			ImageRepository imageRepository, ArticleAuthorRepository articleAuthorRepository, AuthorRepository authorRepository) {
+			ImageRepository imageRepository, ArticleAuthorRepository articleAuthorRepository, AuthorRepository authorRepository, ArticleService articleService) {
 		this.articleRepository = articleRepository;
-		this.categoryRepository = categoryRepository;
-		this.imageRepository = imageRepository;
-		this.articleAuthorRepository = articleAuthorRepository;
-		this.authorRepository = authorRepository;
+		this.articleService = articleService;
 	}
 
 	@GetMapping
 	public ResponseEntity<List<ArticleDto>> getAllArticle() {
 
-		List<ArticleDto> articlesDto = articleRepository.findAll().stream().map(article -> ArticleDto.convertToDTO(article))
-				.collect(Collectors.toList());
-
+		List<ArticleDto> articlesDto = articleService.getAllArticles();
 		if (articlesDto.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
-
 		return ResponseEntity.ok(articlesDto);
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ArticleDto> getArticleById(@PathVariable Long id) {
-		Article article = articleRepository.findById(id).orElse(null);
-		if (article == null) {
-			return ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(ArticleDto.convertToDTO(article));
+		ArticleDto article = articleService.getArticleById(id);
+		return ResponseEntity.ok(article);
 	}
 
 	@PostMapping
 	public ResponseEntity<ArticleDto> createArticle(@RequestBody Article article) {
-		article.setCreatedAt(LocalDateTime.now());
-		article.setUpdatedAt(LocalDateTime.now());
-
-		if (article.getCategory() != null) {
-			Category category = categoryRepository.findByName(article.getCategory().getName()).orElse(null);
-			if (category == null) {
-				return ResponseEntity.badRequest().body(null);
-			}
-			article.setCategory(category);
-		}
-
-		if (article.getImages() != null && !article.getImages().isEmpty()) {
-			List<Image> validImages = new ArrayList<Image>();
-			for (Image image : article.getImages()) {
-					Image existingImage = imageRepository.findByUrl(image.getUrl()).orElse(null);
-					if (existingImage != null) {
-						validImages.add(existingImage);
-					} else {
-						image.setCreatedAt(LocalDateTime.now());
-						image.setUpdatedAt(LocalDateTime.now());
-						Image newImage = imageRepository.save(image);
-						validImages.add(newImage);
-					}
-			}
-			article.setImages(validImages);
-		}
-
-		Article savedArticle = articleRepository.save(article);
-		
-		if (article.getArticleAuthors() != null) {
-            for (ArticleAuthor articleAuthor : article.getArticleAuthors()) {
-                Author author = articleAuthor.getAuthor();
-                author = authorRepository.findFirstByLastname(author.getLastname()).orElse(null);
-                if (author == null) {
-                    return ResponseEntity.badRequest().body(null);
-                }
-                
-                articleAuthor.setAuthor(author);
-                articleAuthor.setArticle(savedArticle);
-                articleAuthor.setContribution(articleAuthor.getContribution());
-
-                articleAuthorRepository.save(articleAuthor);
-            }
-        }
-		return ResponseEntity.status(HttpStatus.CREATED).body(ArticleDto.convertToDTO(savedArticle));
+		ArticleDto createdArticle = articleService.createArticle(article);
+		return ResponseEntity.status(HttpStatus.CREATED).body(createdArticle);
 	}
 
 	@PutMapping("/{id}")
 	public ResponseEntity<ArticleDto> updateArticle(@PathVariable Long id, @RequestBody Article articleDetails) {
-		Article article = articleRepository.findById(id).orElse(null);
-		if (article == null) {
-			return ResponseEntity.notFound().build();
-		}
-		article.setTitle(articleDetails.getTitle());
-		article.setContent(articleDetails.getContent());
-		article.setUpdatedAt(LocalDateTime.now());
-
-		if (articleDetails.getCategory() != null) {
-			Category category = categoryRepository.findByName(articleDetails.getCategory().getName()).orElse(null);
-			if (category == null) {
-				return ResponseEntity.badRequest().body(null);
-			}
-			article.setCategory(category);
-		}
-
-		if (articleDetails.getImages() != null && !articleDetails.getImages().isEmpty()) {
-			List<Image> imagesToUpdate = new ArrayList<Image>();
-			for (Image image : articleDetails.getImages()) {
-				if (image.getId() != null) {
-				Image imageToCheck = imageRepository.findByUrl(image.getUrl()).orElse(null);
-				if (imageToCheck != null) {
-					imageToCheck.setUpdatedAt(LocalDateTime.now());
-					imagesToUpdate.add(imageToCheck);
-				} else {
-					return ResponseEntity.badRequest().body(null);
-					//on ne fournit pas un Id pour l'image lors de l'update, sinon erreur 400, a changer ?
-				}
-				}else {
-					image.setUpdatedAt(LocalDateTime.now());
-					image.setCreatedAt(LocalDateTime.now());
-					Image imageToSave = imageRepository.save(image);
-					imagesToUpdate.add(imageToSave);
-			}
-		}
-			article.setImages(imagesToUpdate);
-	}
-		if(articleDetails.getArticleAuthors() != null) {
-			
-			for (ArticleAuthor oldArticleAuthor : article.getArticleAuthors()) {
-                articleAuthorRepository.delete(oldArticleAuthor);
-            }
-
-            List<ArticleAuthor> updatedArticleAuthors = new ArrayList<>();
-            
-			for(ArticleAuthor articleAuthor : articleDetails.getArticleAuthors()) {
-				Author author = articleAuthor.getAuthor();
-				author = authorRepository.findFirstByLastname(author.getLastname()).orElse(null);
-				if(author == null) {
-					return ResponseEntity.badRequest().body(null);
-				}
-				
-				ArticleAuthor newArticleAuth = new ArticleAuthor();
-				newArticleAuth.setArticle(article);
-				newArticleAuth.setAuthor(author);
-				newArticleAuth.setContribution(articleAuthor.getContribution());
-				
-				updatedArticleAuthors.add(newArticleAuth);
-			}
-			
-			for(ArticleAuthor articleAuthor : updatedArticleAuthors) {
-				articleAuthorRepository.save(articleAuthor);
-			}
-			article.setArticleAuthors(updatedArticleAuthors);
-		}
-
-	Article updatedArticle = articleRepository.save(article);
-	return ResponseEntity.ok(ArticleDto.convertToDTO(updatedArticle));
+		ArticleDto articleUpdated = articleService.updateArticle(id, articleDetails);
+	return ResponseEntity.ok(articleUpdated);
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteArticle(@PathVariable Long id){
-		Article article = articleRepository.findById(id).orElse(null);
-		if(article == null) {
-			return ResponseEntity.notFound().build();
-		} 
-		if(article.getArticleAuthors() != null) {
-			for(ArticleAuthor artAt : article.getArticleAuthors()) {
-				articleAuthorRepository.delete(artAt);
-			}	
-		}
-		articleRepository.delete(article);
-		return ResponseEntity.noContent().build();
+		if (articleService.deleteArticle(id)) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
 	}
 
 	@GetMapping("/search-content")
