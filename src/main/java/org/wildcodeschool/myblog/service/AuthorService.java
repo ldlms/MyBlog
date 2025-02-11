@@ -6,8 +6,10 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.wildcodeschool.myblog.dto.ArticleContributionDto;
 import org.wildcodeschool.myblog.dto.ArticleDto;
 import org.wildcodeschool.myblog.dto.AuthorDto;
+import org.wildcodeschool.myblog.dto.CreateAuthorDto;
 import org.wildcodeschool.myblog.exception.RessourceNotFoundException;
 import org.wildcodeschool.myblog.model.Article;
 import org.wildcodeschool.myblog.model.ArticleAuthor;
@@ -42,55 +44,52 @@ public class AuthorService {
 				.orElseThrow(() -> new RessourceNotFoundException("L'autheur avec l'id " + id + " n'a pas été trouvé"));
 	}
 		
-	public AuthorDto createAuthor(Author author) {
-		author.setCreatedAt(LocalDateTime.now());
-		author.setUpdatedAt(LocalDateTime.now());
+	public AuthorDto createAuthor(CreateAuthorDto authorDto) {
+		
+		Author author = CreateAuthorDto.convertToEntity(authorDto);
 		
 		Author savedAuthor = authorRepository.save(author);
 		
-		if(author.getArticleAuthors() != null && !author.getArticleAuthors().isEmpty()) {
-		for(ArticleAuthor articleAuthor : author.getArticleAuthors()) {
-			Article article = articleAuthor.getArticle();
-			article = articleRepository.findFirstByTitle(article.getTitle())
-					.orElseThrow(() -> new RessourceNotFoundException("L'article avec le titre " + articleAuthor.getArticle().getTitle() + " n'a pas été trouvé"));
+
+		for(ArticleContributionDto articleAuthorDto : authorDto.article()) {
+			Article article = articleRepository.findById(articleAuthorDto.articleId())
+					.orElseThrow(() -> new RessourceNotFoundException("L'article avec le titre " + articleAuthorDto.articleId() + " n'a pas été trouvé"));
 			
+			ArticleAuthor articleAuthor = new ArticleAuthor();
 			articleAuthor.setArticle(article);
 			articleAuthor.setAuthor(author);
-			articleAuthor.setContribution(articleAuthor.getContribution());
+			articleAuthor.setContribution(articleAuthorDto.contribution());
 			articleAuthorRepository.save(articleAuthor);
 		}
-		}
+		
 		return AuthorDto.convertToDTO(savedAuthor);
 	}
 	
-	public AuthorDto updateAuthor(Author authorDetails, Long id) {
+	public AuthorDto updateAuthor(CreateAuthorDto authorDetails, Long id) {
 
 
 		Author author = authorRepository.findById(id)
 				.orElseThrow(() -> new RessourceNotFoundException("L'autheur avec l'id " + id + " n'a pas été trouvé"));
 		
 		author.setUpdatedAt(LocalDateTime.now());
-		author.setFirstname(authorDetails.getFirstname());
-		author.setLastname(authorDetails.getLastname());
-		
-		if(authorDetails.getArticleAuthors() != null && !authorDetails.getArticleAuthors().isEmpty()) {
-			
+		author.setFirstname(authorDetails.firstname());
+		author.setLastname(authorDetails.lastname());
+				
 			for (ArticleAuthor oldArticleAuthor : author.getArticleAuthors()) {
                 articleAuthorRepository.delete(oldArticleAuthor);
             }
 			
 			List<ArticleAuthor> ValidArticleAuthor = new ArrayList<ArticleAuthor>();
 			
-			for(ArticleAuthor articleAuthor : authorDetails.getArticleAuthors()) {
-				Article article = articleAuthor.getArticle();
-				article = articleRepository.findFirstByTitle(article.getTitle())
-						.orElseThrow(() -> new RessourceNotFoundException("L'article avec le titre " + articleAuthor.getArticle().getTitle() + " n'a pas été trouvé"));
+			for(ArticleContributionDto articleAuthor : authorDetails.article()) {
+				Article article = articleRepository.findById(articleAuthor.articleId())
+						.orElseThrow(() -> new RessourceNotFoundException("L'article avec le titre " + articleAuthor.articleId() + " n'a pas été trouvé"));
 				
 				
 				ArticleAuthor newArticleAuthor = new ArticleAuthor();
 				newArticleAuthor.setArticle(article);
 				newArticleAuthor.setAuthor(author);
-				newArticleAuthor.setContribution(articleAuthor.getContribution());
+				newArticleAuthor.setContribution(articleAuthor.contribution());
 				
 				ValidArticleAuthor.add(newArticleAuthor);
 			}
@@ -98,7 +97,7 @@ public class AuthorService {
 				articleAuthorRepository.save(validAa);
 			}
 			author.setArticleAuthors(ValidArticleAuthor);
-		}
+		
 		Author savedAuthor = authorRepository.save(author);
 		
 		return AuthorDto.convertToDTO(savedAuthor);

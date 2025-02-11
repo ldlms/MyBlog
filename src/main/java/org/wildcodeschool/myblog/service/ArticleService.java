@@ -84,7 +84,7 @@ public class ArticleService {
 				ArticleAuthor articleAuthor = new ArticleAuthor();
 				articleAuthor.setAuthor(author);
 				articleAuthor.setArticle(savedArticle);
-				articleAuthor.setContribution(articleAuthor.getContribution());
+				articleAuthor.setContribution(authoContribution.contribution());
 				articleAuthorRepository.save(articleAuthor);
 			}
 

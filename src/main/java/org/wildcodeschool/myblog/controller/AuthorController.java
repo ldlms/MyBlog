@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.wildcodeschool.myblog.dto.ArticleDto;
 import org.wildcodeschool.myblog.dto.AuthorDto;
+import org.wildcodeschool.myblog.dto.CreateAuthorDto;
 import org.wildcodeschool.myblog.model.Article;
 import org.wildcodeschool.myblog.model.ArticleAuthor;
 import org.wildcodeschool.myblog.model.Author;
@@ -50,13 +51,13 @@ public class AuthorController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<AuthorDto> createAuthor(@RequestBody Author author){
+	public ResponseEntity<AuthorDto> createAuthor(@RequestBody CreateAuthorDto author){
 		AuthorDto authorCreated = authorService.createAuthor(author);
 		return ResponseEntity.ok(authorCreated);
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<AuthorDto> updateAuthor(@RequestBody Author authorDetails, @PathVariable Long id){
+	public ResponseEntity<AuthorDto> updateAuthor(@RequestBody CreateAuthorDto authorDetails, @PathVariable Long id){
 		AuthorDto updatedAuthor = authorService.updateAuthor(authorDetails, id);
 		return ResponseEntity.ok(updatedAuthor);
 		

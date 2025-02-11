@@ -30,6 +30,13 @@ public class Author {
 	
 	@OneToMany(mappedBy = "author")
     private List<ArticleAuthor> articleAuthors;
+	
+	public Author(String firstname, String lastname) {
+		this.firstname = firstname;
+		this.lastname = lastname;
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
+	}
 
 	public Long getId() {
 		return id;
