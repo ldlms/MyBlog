@@ -47,6 +47,13 @@ public class Article {
 	
 	@OneToMany(mappedBy = "article")
     private List<ArticleAuthor> articleAuthors;
+	
+	public Article(String title, String content) {
+		this.title = title;
+		this.content = content;
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
+	}
 
 	public Long getId() {
 		return id;

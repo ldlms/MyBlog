@@ -30,7 +30,15 @@ public record CreateArticleDto (
 
     @NotEmpty(message = "La liste des auteurs ne doit pas être vide")
     List<@Valid AuthorContributionDto> authors
-) {}
+) {
+	public static Article convertToEntity(CreateArticleDto dto) {
+		return new Article(
+				dto.title(),
+				dto.content()
+				
+				);
+	};
+}
 	
 	
 	

@@ -54,16 +54,13 @@ public class ArticleService {
 
 	public ArticleDto createArticle(CreateArticleDto articleDto) { 
 		
-		Article article = new Article();
-		article.setCreatedAt(LocalDateTime.now());
-		article.setUpdatedAt(LocalDateTime.now());
-		if (articleDto.categoryId() != null) {
+		Article article = CreateArticleDto.convertToEntity(articleDto);
+	
 			Category category = categoryRepository.findById(articleDto.categoryId())
 					.orElseThrow(() -> new RessourceNotFoundException(
 							"La category avec l'id " + articleDto.categoryId() + " n'a pas été trouvé"));
 			article.setCategory(category);
-		}
-		if (articleDto.images() != null && !articleDto.images().isEmpty()) {
+
 			List<Image> validImages = new ArrayList<>();
 			for (ImageDto imageDto : articleDto.images()) {
 				if (imageDto.id() != null) {
@@ -78,9 +75,9 @@ public class ArticleService {
 				}
 			}
 			article.setImages(validImages);
-		}
+
 		Article savedArticle = articleRepository.save(article);
-		if (articleDto.authors() != null) {
+
 			for (AuthorContributionDto authoContribution : articleDto.authors()) {
 				Author author = authorRepository.findById(authoContribution.authorId()).orElseThrow(() -> new RessourceNotFoundException(
 						"L'autheur avec l'id " + authoContribution.authorId() + " n'a pas été trouvé"));
@@ -90,7 +87,7 @@ public class ArticleService {
 				articleAuthor.setContribution(articleAuthor.getContribution());
 				articleAuthorRepository.save(articleAuthor);
 			}
-		}
+
 		return ArticleDto.convertToDTO(savedArticle);
 	}
 
@@ -99,17 +96,18 @@ public class ArticleService {
 		Article article = articleRepository.findById(id)
 				.orElseThrow(() -> new RessourceNotFoundException("L'article avec l'id " + id + " n'a pas été trouvé"));
 	
+		
 		article.setTitle(articleDetails.title());
 		article.setContent(articleDetails.content());
 		article.setUpdatedAt(LocalDateTime.now());
-		if (articleDetails.categoryId() != null) {
+
 			Category category = categoryRepository.findById(articleDetails.categoryId())
 					.orElseThrow(() -> new RessourceNotFoundException(
 							"La category avec l'id " + articleDetails.categoryId() + " n'a pas été trouvé"));
 			article.setCategory(category);
-		}
+		
 
-		if (articleDetails.images() != null) {
+
 			List<Image> validImages = new ArrayList<>();
 			for (ImageDto image : articleDetails.images()) {
 				if (image.id() != null) {
@@ -123,10 +121,7 @@ public class ArticleService {
 				}
 			}
 			article.setImages(validImages);
-		} else {
-			article.getImages().clear();
-		}
-		if (articleDetails.authors() != null) {
+		
 			for (ArticleAuthor oldArticleAuthor : article.getArticleAuthors()) {
 				articleAuthorRepository.delete(oldArticleAuthor);
 			}
@@ -150,7 +145,7 @@ public class ArticleService {
 			}
 
 			article.setArticleAuthors(updatedArticleAuthors);
-		}
+		
 
 		Article updatedArticle = articleRepository.save(article);
 		return ArticleDto.convertToDTO(updatedArticle);
