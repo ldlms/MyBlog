@@ -8,8 +8,12 @@ import org.wildcodeschool.myblog.model.ArticleAuthor;
 import org.wildcodeschool.myblog.model.Author;
 import org.wildcodeschool.myblog.model.Image;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record ArticleDto(Long id, 
 		String title, 
+		
+		@NotBlank()
 		String content, 
 		String categoryName, 
 		List<String> imagesUrl,

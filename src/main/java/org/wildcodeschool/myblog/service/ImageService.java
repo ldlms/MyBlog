@@ -4,12 +4,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
 import org.wildcodeschool.myblog.dto.ImageDto;
 import org.wildcodeschool.myblog.exception.RessourceNotFoundException;
 import org.wildcodeschool.myblog.model.Article;
 import org.wildcodeschool.myblog.model.Image;
 import org.wildcodeschool.myblog.repository.ImageRepository;
 
+@Service
 public class ImageService {
 	
 	private final ImageRepository imageRepository;

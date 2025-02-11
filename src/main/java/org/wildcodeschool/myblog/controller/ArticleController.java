@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.wildcodeschool.myblog.dto.ArticleDto;
+import org.wildcodeschool.myblog.dto.CreateArticleDto;
 import org.wildcodeschool.myblog.model.Article;
 import org.wildcodeschool.myblog.model.ArticleAuthor;
 import org.wildcodeschool.myblog.model.Author;
@@ -63,13 +64,13 @@ public class ArticleController {
 	}
 
 	@PostMapping
-	public ResponseEntity<ArticleDto> createArticle(@RequestBody Article article) {
-		ArticleDto createdArticle = articleService.createArticle(article);
+	public ResponseEntity<ArticleDto> createArticle(@RequestBody CreateArticleDto articleDto) {
+		ArticleDto createdArticle = articleService.createArticle(articleDto);
 		return ResponseEntity.status(HttpStatus.CREATED).body(createdArticle);
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<ArticleDto> updateArticle(@PathVariable Long id, @RequestBody Article articleDetails) {
+	public ResponseEntity<ArticleDto> updateArticle(@PathVariable Long id, @RequestBody CreateArticleDto articleDetails) {
 		ArticleDto articleUpdated = articleService.updateArticle(id, articleDetails);
 	return ResponseEntity.ok(articleUpdated);
 	}

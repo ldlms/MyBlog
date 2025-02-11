@@ -28,6 +28,12 @@ public class Image {
 
     @ManyToMany(mappedBy = "images")
     private List<Article> articles;
+    
+    public Image(String url) {
+    	this.createdAt = LocalDateTime.now();
+    	this.updatedAt = LocalDateTime.now();
+    	this.url = url;
+    }
 
 	public Long getId() {
 		return id;
