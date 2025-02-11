@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.wildcodeschool.myblog.dto.CreateImageDto;
 import org.wildcodeschool.myblog.dto.ImageDto;
 import org.wildcodeschool.myblog.model.Article;
 import org.wildcodeschool.myblog.model.Image;
@@ -47,12 +48,12 @@ public class ImageController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<ImageDto> createImage(@RequestBody Image image){
+	public ResponseEntity<ImageDto> createImage(@RequestBody CreateImageDto image){
 		return ResponseEntity.ok(imageService.createImage(image));
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<ImageDto> updateImage(@RequestBody Image imageDetails, @PathVariable Long id){
+	public ResponseEntity<ImageDto> updateImage(@RequestBody CreateImageDto imageDetails, @PathVariable Long id){
 		return ResponseEntity.ok(imageService.updateImage(id, imageDetails));
 	}
 	

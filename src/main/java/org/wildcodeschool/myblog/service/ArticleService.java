@@ -62,7 +62,7 @@ public class ArticleService {
 			article.setCategory(category);
 
 			List<Image> validImages = new ArrayList<>();
-			for (ImageDto imageDto : articleDto.images()) {
+			for (CreateImageDto imageDto : articleDto.images()) {
 				if (imageDto.id() != null) {
 					Image existingImage = imageRepository.findById(imageDto.id())
 							.orElseThrow(() -> new RessourceNotFoundException(
@@ -109,7 +109,7 @@ public class ArticleService {
 
 
 			List<Image> validImages = new ArrayList<>();
-			for (ImageDto image : articleDetails.images()) {
+			for (CreateImageDto image : articleDetails.images()) {
 				if (image.id() != null) {
 					Image existingImage = imageRepository.findById(image.id())
 							.orElseThrow(() -> new RessourceNotFoundException(

@@ -26,7 +26,7 @@ public record CreateArticleDto (
     Long categoryId,
 
     @NotEmpty(message = "La liste des images ne doit pas être vide")
-    List<@Valid ImageDto> images,
+    List<@Valid CreateImageDto> images,
 
     @NotEmpty(message = "La liste des auteurs ne doit pas être vide")
     List<@Valid AuthorContributionDto> authors
