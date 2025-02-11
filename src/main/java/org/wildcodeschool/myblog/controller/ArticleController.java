@@ -34,6 +34,8 @@ import org.wildcodeschool.myblog.repository.CategoryRepository;
 import org.wildcodeschool.myblog.repository.ImageRepository;
 import org.wildcodeschool.myblog.service.ArticleService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/articles")
 public class ArticleController {
@@ -64,13 +66,13 @@ public class ArticleController {
 	}
 
 	@PostMapping
-	public ResponseEntity<ArticleDto> createArticle(@RequestBody CreateArticleDto articleDto) {
+	public ResponseEntity<ArticleDto> createArticle(@Valid @RequestBody CreateArticleDto articleDto) {
 		ArticleDto createdArticle = articleService.createArticle(articleDto);
 		return ResponseEntity.status(HttpStatus.CREATED).body(createdArticle);
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<ArticleDto> updateArticle(@PathVariable Long id, @RequestBody CreateArticleDto articleDetails) {
+	public ResponseEntity<ArticleDto> updateArticle(@PathVariable Long id,@Valid @RequestBody CreateArticleDto articleDetails) {
 		ArticleDto articleUpdated = articleService.updateArticle(id, articleDetails);
 	return ResponseEntity.ok(articleUpdated);
 	}

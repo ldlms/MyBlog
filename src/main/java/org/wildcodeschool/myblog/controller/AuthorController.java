@@ -24,6 +24,8 @@ import org.wildcodeschool.myblog.repository.ArticleRepository;
 import org.wildcodeschool.myblog.repository.AuthorRepository;
 import org.wildcodeschool.myblog.service.AuthorService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/authors")
 public class AuthorController {
@@ -51,13 +53,13 @@ public class AuthorController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<AuthorDto> createAuthor(@RequestBody CreateAuthorDto author){
+	public ResponseEntity<AuthorDto> createAuthor(@Valid @RequestBody CreateAuthorDto author){
 		AuthorDto authorCreated = authorService.createAuthor(author);
 		return ResponseEntity.ok(authorCreated);
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<AuthorDto> updateAuthor(@RequestBody CreateAuthorDto authorDetails, @PathVariable Long id){
+	public ResponseEntity<AuthorDto> updateAuthor(@Valid @RequestBody CreateAuthorDto authorDetails, @PathVariable Long id){
 		AuthorDto updatedAuthor = authorService.updateAuthor(authorDetails, id);
 		return ResponseEntity.ok(updatedAuthor);
 		

@@ -23,6 +23,8 @@ import org.wildcodeschool.myblog.model.Category;
 import org.wildcodeschool.myblog.repository.CategoryRepository;
 import org.wildcodeschool.myblog.service.CategoryService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/category")
 public class CategoryController {
@@ -51,14 +53,14 @@ public class CategoryController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<CategoryDto> addCategory(@RequestBody CreateCategoryDto category){
+	public ResponseEntity<CategoryDto> addCategory(@Valid @RequestBody CreateCategoryDto category){
 		CategoryDto categoryDto = categoryService.createCategory(category);
 		
 		return ResponseEntity.ok(categoryDto);
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long id, @RequestBody CreateCategoryDto categoryDetails){
+	public ResponseEntity<CategoryDto> updateCategory(@Valid @PathVariable Long id, @RequestBody CreateCategoryDto categoryDetails){
 		CategoryDto savedCategory = categoryService.updateCategory(id, categoryDetails);
 		return ResponseEntity.ok(savedCategory);
 	}

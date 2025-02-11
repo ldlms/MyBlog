@@ -22,6 +22,8 @@ import org.wildcodeschool.myblog.repository.ArticleRepository;
 import org.wildcodeschool.myblog.repository.ImageRepository;
 import org.wildcodeschool.myblog.service.ImageService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/images")
 public class ImageController {
@@ -48,12 +50,12 @@ public class ImageController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<ImageDto> createImage(@RequestBody CreateImageDto image){
+	public ResponseEntity<ImageDto> createImage(@Valid @RequestBody CreateImageDto image){
 		return ResponseEntity.ok(imageService.createImage(image));
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<ImageDto> updateImage(@RequestBody CreateImageDto imageDetails, @PathVariable Long id){
+	public ResponseEntity<ImageDto> updateImage(@Valid @RequestBody CreateImageDto imageDetails, @PathVariable Long id){
 		return ResponseEntity.ok(imageService.updateImage(id, imageDetails));
 	}
 	

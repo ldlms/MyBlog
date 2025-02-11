@@ -31,6 +31,8 @@ public class Author {
 	@OneToMany(mappedBy = "author")
     private List<ArticleAuthor> articleAuthors;
 	
+	public Author() {}
+	
 	public Author(String firstname, String lastname) {
 		this.firstname = firstname;
 		this.lastname = lastname;

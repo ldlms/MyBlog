@@ -48,6 +48,8 @@ public class Article {
 	@OneToMany(mappedBy = "article")
     private List<ArticleAuthor> articleAuthors;
 	
+	public Article() {}
+	
 	public Article(String title, String content) {
 		this.title = title;
 		this.content = content;
