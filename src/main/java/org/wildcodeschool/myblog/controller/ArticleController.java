@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,12 +72,14 @@ public class ArticleController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(createdArticle);
 	}
 
+	@PreAuthorize("#articleDetails.authors().contains(authentication.principal.id)")
 	@PutMapping("/{id}")
 	public ResponseEntity<ArticleDto> updateArticle(@PathVariable Long id,@Valid @RequestBody CreateArticleDto articleDetails) {
 		ArticleDto articleUpdated = articleService.updateArticle(id, articleDetails);
 	return ResponseEntity.ok(articleUpdated);
 	}
 
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteArticle(@PathVariable Long id){
 		if (articleService.deleteArticle(id)) {

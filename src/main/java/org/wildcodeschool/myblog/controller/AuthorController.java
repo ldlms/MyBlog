@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,7 +58,8 @@ public class AuthorController {
 		AuthorDto authorCreated = authorService.createAuthor(author);
 		return ResponseEntity.ok(authorCreated);
 	}
-	
+
+	@PreAuthorize("#id == authentication.principal.id or hasRole('ROLE_ADMIN')")
 	@PutMapping("/{id}")
 	public ResponseEntity<AuthorDto> updateAuthor(@Valid @RequestBody CreateAuthorDto authorDetails, @PathVariable Long id){
 		AuthorDto updatedAuthor = authorService.updateAuthor(authorDetails, id);
@@ -65,6 +67,7 @@ public class AuthorController {
 		
 	}
 
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> DeleteAuthor(@PathVariable Long id){
 		if (authorService.deleteAuthor(id)) {
