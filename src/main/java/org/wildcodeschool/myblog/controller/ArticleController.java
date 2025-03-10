@@ -72,7 +72,7 @@ public class ArticleController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(createdArticle);
 	}
 
-	@PreAuthorize("#articleDetails.authors().contains(authentication.principal.id)")
+    @PreAuthorize("@articleService.isAuthor(#id, authentication.principal.id)")
 	@PutMapping("/{id}")
 	public ResponseEntity<ArticleDto> updateArticle(@PathVariable Long id,@Valid @RequestBody CreateArticleDto articleDetails) {
 		ArticleDto articleUpdated = articleService.updateArticle(id, articleDetails);

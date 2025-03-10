@@ -158,4 +158,10 @@ public class ArticleService {
 		articleRepository.delete(article);
 		return true;
 	}
+
+	public boolean isAuthor(Long articleId, Long userId) {
+		return articleRepository.findById(articleId)
+				.map(article -> article.getAuthors().stream().anyMatch(author -> author.getId().equals(userId)))
+				.orElse(false);
+	}
 }
